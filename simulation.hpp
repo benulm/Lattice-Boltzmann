@@ -93,12 +93,14 @@
 				// topwall.j = l.ny-1;
 				// add_obstacle(1,l.nx,topwall);
 
+				add_roughness(5,5,20,2,2,2);
 
-
+				/*
 				coordinate<int> first;
 				first.i = 50;
 				first.j = 50;
 				add_obstacle(20,20,first);
+				*/
 
 				for (int j=0; j<static_cast<int>(l.ny); ++j)
 				{
@@ -479,7 +481,10 @@
 
 
 
-		public: // Statistics
+		public: 
+			void add_roughness(int height, int width, int dist, int width_tol, int height_tol, int dist_tol);
+		
+			// Statistics
 			void initial_statistics_averaged();
 
 			void calc_stats_averaged();
@@ -516,6 +521,37 @@
 
 
 	///////////////////////////////////////////////////////////////////
+	//surface roughness
+	void simulation::add_roughness(int height, int width, int dist, int width_tol = 0, int height_tol = 0, int dist_tol	= 0)
+	{
+		std::default_random_engine generator;
+  		std::uniform_int_distribution<int> width_perturb(-width_tol,width_tol);
+  		std::uniform_int_distribution<int> height_perturb(-height_tol,height_tol);
+  		std::uniform_int_distribution<int> dist_perturb(-dist_tol,dist_tol);				
+
+
+
+		int pwidth, pheight, pdist;
+
+		//calculate the perturbed quantities
+		pwidth = width+width_perturb(generator);
+		pheight = height+height_perturb(generator);
+		pdist = dist+dist_perturb(generator);
+
+		coordinate<int> anchor;
+		anchor.i = pdist;
+		anchor.j = 0;
+
+		while (anchor.i + pwidth <= (int)l.nx) {
+			add_obstacle(pheight, pwidth, anchor);
+			anchor.i = anchor.i + pwidth + pdist;
+
+			pwidth = width+width_perturb(generator);
+			pheight = height+height_perturb(generator);
+			pdist = dist+dist_perturb(generator);
+		}
+	}
+
 
 	//calculating statistics:
 	int simulation::average_speed_averaged()
