@@ -6,10 +6,8 @@
 
 #ifndef LB_SIMULATION_HPP_INCLUDED
 #define LB_SIMULATION_HPP_INCLUDED
-
 #include "H_root.hpp"
 #include "lattice.hpp"
-#include "statistics.hpp"
 #include <sstream>
 
 	namespace lb {
@@ -97,10 +95,10 @@
 
 
 
-				// coordinate<int> first;
-				// first.i = 50;
-				// first.j = 50;
-				// add_obstacle(20,20,first);
+				coordinate<int> first;
+				first.i = 50;
+				first.j = 50;
+				add_obstacle(20,20,first);
 
 				for (int j=0; j<static_cast<int>(l.ny); ++j)
 				{
@@ -378,15 +376,15 @@
 			
 				//update_u_rho();	
 
-				accumulate_rho();
+				// accumulate_rho();
 				
 				advect();
 				//std::cout << "before wall bc, after advect" << l << std::endl;
 				wall_bc();
 				update_u_rho();
 
-				accumulate_rho();
-				std::cout << std::endl;
+				// accumulate_rho();
+				// std::cout << std::endl;
 
 
 				//std::cout << "after wall bc" << l << std::endl;
@@ -402,6 +400,9 @@
 				}
 
 				++time;
+
+				calc_stats_averaged();
+
 			}
 
 
@@ -519,15 +520,56 @@
 	//calculating statistics:
 	int simulation::average_speed_averaged()
 	{
-		double total_speed = 0;
-		for(int i=0; i<l.ny; i++){
-			total_speed += Vmax * pow((i/l.ny),1.0/7);
+		if(asa==-1){
+			double total_speed = 0;
+			int count = 0;
+			for(unsigned i=0; i<l.ny; i++){
+				total_speed += Vmax * pow((i/l.ny),1.0/7);
+				count++;
+			}
+			total_speed /= count;
+
+			asa = total_speed;
+
 		}
+		return asa;
 
 	}
 
 	void simulation::initial_statistics_averaged()
 	{
+		if(time !=0){
+			std::cout << "time already stepped, no initial average possible" << std::endl;
+			return;
+		}
+		else{
+			double i_glob = 0;
+			int count = 0;
+			for(unsigned i=1; i<l.ny; i++){
+				double u_initial = Vmax * pow( ((double)i)/l.ny,1.0/7);
+				double i_loc = (sqrt(pow(l.get_node(0,i).v(),2) + pow(l.get_node(0,i).u() - u_initial,2)) )/ u_initial;
+				//std::cout << "local i is: " << i_loc << std::endl;
+				i_glob += i_loc;
+				count++;
+			}
+
+			std::cout << "the averaged initial pertubation is: I_{avg} = " << i_glob / count << std::endl;
+		}
+	}
+
+	void simulation::calc_stats_averaged()
+	{
+		double i_glob = 0;
+		int count = 0;
+		for(unsigned i=1; i<l.ny; i++){
+			double u_initial = Vmax * pow( ((double)i)/l.ny,1.0/7);
+			double i_loc = (sqrt(pow(l.get_node(0,i).v(),2) + pow(l.get_node(0,i).u() - u_initial,2)) )/ u_initial;
+			//std::cout << "local i is: " << i_loc << std::endl;
+			i_glob += i_loc;
+			count++;
+		}
+
+		std::cout << "the averaged pertubation at time t: " << time << " is: I_{avg} = " << i_glob / count << std::endl;
 
 	}
 
