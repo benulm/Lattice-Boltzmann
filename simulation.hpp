@@ -474,6 +474,18 @@
 				return os;
 			}
 
+
+
+
+
+		public: // Statistics
+			void initial_statistics_averaged();
+
+			void calc_stats_averaged();
+
+			int average_speed_averaged();
+
+
 		public: // members
 
 			lattice l;                 ///< lattice
@@ -487,10 +499,37 @@
 			unsigned int output_freq;  ///< file output frequency
 			unsigned int output_index; ///< index for file naming
 
+
+			double asa = -1;
+
 			std::uniform_real_distribution<double>  distrx;
 			std::uniform_real_distribution<double>  distry;
 			std::mt19937 g1;
 	};
+
+
+
+
+
+
+
+
+	///////////////////////////////////////////////////////////////////
+
+	//calculating statistics:
+	int simulation::average_speed_averaged()
+	{
+		double total_speed = 0;
+		for(int i=0; i<l.ny; i++){
+			total_speed += Vmax * pow((i/l.ny),1.0/7);
+		}
+
+	}
+
+	void simulation::initial_statistics_averaged()
+	{
+
+	}
 
 } // lb
 
