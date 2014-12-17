@@ -9,11 +9,34 @@
 
 int main(int argc, char *argv[])
 {
+
+
+	double vmax, visc, Hdivh;
+	unsigned nx, h, d, w, pert;
+
+
+	if(argc < 9){
+ 		std::cout << "Call the programm: " << argv[0] << "[nx, visc, v_max, h(obstacle), H/h, width(obstacle), dist(obstacle), pertubation]" << std::endl; 
+	}
+    else {
+        nx = atoi(argv[1]);
+        visc = atof(argv[2]);
+        vmax = atof(argv[3]);
+        h = atoi(argv[4]);
+        Hdivh = atoi(argv[5]);
+        w = atoi(argv[6]);
+        d = atoi(argv[7]);
+        pert = atoi(argv[8]);
+    } 
+
 	omp_set_num_threads(std::max(omp_get_max_threads(),omp_get_num_procs()));
 	
-	lb::simulation* sim = new lb::simulation(100,100,10000,0.05);
-	sim->initialize();
+	lb::simulation* sim = new lb::simulation(nx,(unsigned) (Hdivh * h),10000,vmax, visc);
+	sim->initialize(w,h,d,pert);
 	std::cout << *sim << std::endl;
+
+
+	sim->initial_statistics_averaged();
 
 	#ifdef USE_OPENGL_VISUALIZATION
 	

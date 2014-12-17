@@ -31,12 +31,12 @@
 				 *  @param[in] _Re   Reynolds number
 				 *  @param[in] _Vmax mean flow velocity
 			 */
-			simulation(unsigned int nx, unsigned int ny, float_type _Re, float_type _Vmax)
+			simulation(unsigned int nx, unsigned int ny, float_type _Re, float_type _Vmax, double visc_)
 				: l(nx, ny), 
 				shift(velocity_set().size),
 				Re(_Re), 
 				Vmax(_Vmax),
-				visc( /*fill in your code here*/ 0.01),
+				visc( /*fill in your code here*/ visc_),
 				beta( /*fill in your code here*/ 1./(2.*visc/(velocity_set().cs*velocity_set().cs)+1.)),
 				time(0),
 				file_output(false), // set to true if you want to write files
@@ -44,7 +44,7 @@
 				output_index(0),
 				// Random number generators for pertubation
 				distrx(-0.02,0.02),
-				distry(-0.501,0.501),
+				distry(-0.01,0.01),
 				g1(712)
 		{ 
 			// define amount to shift populations for advection
@@ -65,67 +65,128 @@
 			 *  Initialization includes defining initial density, velocity and
 			 *  populations. You can use Taylor-Green vortex flow conditions.
 			 */
-			void initialize()
-			{
+			  void initialize(int w, int h, int d, int perturb)
+            {
 
-				//const float_type pi(std::acos(-1.0));
-				// **************************
-				// * fill in your code here *
-				/*
-				const float_type lambda_x = 1.;
-				const float_type lambda_y = 1.;
-				const float_type K_x = 2.*pi/l.nx/lambda_x;
-				const float_type K_y = 2.*pi/l.ny/lambda_y;
-				const float_type K2 = K_x*K_x+K_y*K_y;
-				const float_type Ma = Vmax/velocity_set().cs;
-				*/
+                //const float_type pi(std::acos(-1.0));
+                // **************************
+                // * fill in your code here *
+                /*
+                const float_type lambda_x = 1.;
+                const float_type lambda_y = 1.;
+                const float_type K_x = 2.*pi/l.nx/lambda_x;
+                const float_type K_y = 2.*pi/l.ny/lambda_y;
+                const float_type K2 = K_x*K_x+K_y*K_y;
+                const float_type Ma = Vmax/velocity_set().cs;
+                */
 
-				/* height s.t 0.9* vmax at 10*heightmax of obstacles*/
+                /* height s.t 0.9* vmax at 10*heightmax of obstacles*/
 
 
-				coordinate<int> botwall;
-				botwall.i=0;
-				botwall.j=0;
-				add_obstacle(1,l.nx,botwall);
+                coordinate<int> botwall;
+                botwall.i=0;
+                botwall.j=0;
+                add_obstacle(1,l.nx,botwall);
 
-				// coordinate<int> topwall;
-				// topwall.i = 0;
-				// topwall.j = l.ny-1;
-				// add_obstacle(1,l.nx,topwall);
+                // coordinate<int> topwall;
+                // topwall.i = 0;
+                // topwall.j = l.ny-1;
+                // add_obstacle(1,l.nx,topwall);
 
-				add_roughness(5,5,20,2,2,2);
+                add_roughness(h,w,d,perturb,perturb,perturb);
 
-				/*
-				coordinate<int> first;
-				first.i = 50;
-				first.j = 50;
-				add_obstacle(20,20,first);
-				*/
+                /*
+                coordinate<int> first;
+                first.i = 50;
+                first.j = 50;
+                add_obstacle(20,20,first);
+                */
 
-				for (int j=0; j<static_cast<int>(l.ny); ++j)
-				{
-					for (int i=0; i<static_cast<int>(l.nx); ++i)
-					{	
-						double y = l.get_node(i,j).coord.j;
+                for (int j=0; j<static_cast<int>(l.ny); ++j)
+                {
+                    for (int i=0; i<static_cast<int>(l.nx); ++i)
+                    {
+                        double y = l.get_node(i,j).coord.j;
+
+                        double vlenght = Vmax * pow((y/l.ny),1.0/7);
+                        double disturb_x = distrx(g1); /* [-0.01, 0.01] */
+                        double disturb_y = distry(g1); /* [-0.02, 0.02] */
+                            l.get_node(i,j).u()   = vlenght + (vlenght * disturb_x);
+                            l.get_node(i,j).v()   = 0 + (vlenght* disturb_y);
+                            l.get_node(i,j).rho() = 1;
+
+                        velocity_set().equilibrate(l.get_node(i,j));
+                        // double rhosum = 0;
+                        // for(int p=0; p<9 ;p++){
+                        //     rhosum += l.get_node(i,j).f(p);
+                        // }
+                        //std::cout << " node ("  << i << " , " << j << ") has rho: " << rhosum << std::endl;
+                        //std::cout << "node (" << i << " , " << j << ") has velocities \nu: " << l.get_node(i,j).u() << "\nv:" << l.get_node(i,j).v() << std::endl << std::endl;
+                    }
+                }
+                // **************************
+            } 
+			// void initialize()
+			// {
+
+			// 	//const float_type pi(std::acos(-1.0));
+			// 	// **************************
+			// 	// * fill in your code here *
+			// 	/*
+			// 	const float_type lambda_x = 1.;
+			// 	const float_type lambda_y = 1.;
+			// 	const float_type K_x = 2.*pi/l.nx/lambda_x;
+			// 	const float_type K_y = 2.*pi/l.ny/lambda_y;
+			// 	const float_type K2 = K_x*K_x+K_y*K_y;
+			// 	const float_type Ma = Vmax/velocity_set().cs;
+			// 	*/
+
+			// 	/* height s.t 0.9* vmax at 10*heightmax of obstacles*/
+
+
+			// 	coordinate<int> botwall;
+			// 	botwall.i=0;
+			// 	botwall.j=0;
+			// 	add_obstacle(1,l.nx,botwall);
+
+			// 	// coordinate<int> topwall;
+			// 	// topwall.i = 0;
+			// 	// topwall.j = l.ny-1;
+			// 	// add_obstacle(1,l.nx,topwall);
+
+			// 	add_roughness(10,5,5,2,2,2);
+
+			// 	/*
+			// 	coordinate<int> first;
+			// 	first.i = 50;
+			// 	first.j = 50;
+			// 	add_obstacle(20,20,first);
+			// 	*/
+
+			// 	for (int j=0; j<static_cast<int>(l.ny); ++j)
+			// 	{
+			// 		for (int i=0; i<static_cast<int>(l.nx); ++i)
+			// 		{	
+			// 			double y = l.get_node(i,j).coord.j;
 						
-						double vlenght = Vmax * pow((y/l.ny),1.0/7);
-						double disturb_x = distrx(g1); /* [-0.01, 0.01] */ 
-						double disturb_y = distry(g1); /* [-0.02, 0.02] */
-							l.get_node(i,j).u()   = vlenght + (vlenght * disturb_x);
-							l.get_node(i,j).v()   = 0 +        (vlenght* disturb_y);
-							l.get_node(i,j).rho() = 1;
+			// 			double vlenght = Vmax * pow((y/l.ny),1.0/7);
+			// 			double disturb_x = distrx(g1); /* [-0.01, 0.01] */ 
+			// 			double disturb_y = distry(g1); /* [-0.02, 0.02] */
+			// 				l.get_node(i,j).u()   = vlenght + (vlenght * disturb_x);
+			// 				l.get_node(i,j).v()   = 0 +        (vlenght* disturb_y);
+			// 				l.get_node(i,j).rho() = 1;
 						
-						velocity_set().equilibrate(l.get_node(i,j));
-						// double rhosum = 0;
-						// for(int p=0; p<9 ;p++){
-						// 	rhosum += l.get_node(i,j).f(p);
-						// }
-						//std::cout << " node ("  << i << " , " << j << ") has rho: " << rhosum << std::endl;
-						//std::cout << "node (" << i << " , " << j << ") has velocities \nu: " << l.get_node(i,j).u() << "\nv:" << l.get_node(i,j).v() << std::endl << std::endl;
-					}
-				}
-				// **************************
-			}
+			// 			velocity_set().equilibrate(l.get_node(i,j));
+			// 			// double rhosum = 0;
+			// 			// for(int p=0; p<9 ;p++){
+			// 			// 	rhosum += l.get_node(i,j).f(p);
+			// 			// }
+			// 			//std::cout << " node ("  << i << " , " << j << ") has rho: " << rhosum << std::endl;
+			// 			//std::cout << "node (" << i << " , " << j << ") has velocities \nu: " << l.get_node(i,j).u() << "\nv:" << l.get_node(i,j).v() << std::endl << std::endl;
+			// 		}
+			// 	}
+			// 	// **************************
+			// }
 
 			/** 
 			 *  @brief advect the populations
@@ -379,7 +440,6 @@
 				//update_u_rho();	
 
 				// accumulate_rho();
-				
 				advect();
 				//std::cout << "before wall bc, after advect" << l << std::endl;
 				wall_bc();
@@ -403,7 +463,9 @@
 
 				++time;
 
-				calc_stats_averaged();
+				//calc_stats_averaged();
+
+				calc_stats_at_h(15);
 
 			}
 
@@ -491,6 +553,8 @@
 
 			int average_speed_averaged();
 
+			void calc_stats_at_h(int h);
+
 
 		public: // members
 
@@ -524,7 +588,8 @@
 	//surface roughness
 	void simulation::add_roughness(int height, int width, int dist, int width_tol = 0, int height_tol = 0, int dist_tol	= 0)
 	{
-		std::default_random_engine generator;
+		std::default_random_engine generator(712);
+		
   		std::uniform_int_distribution<int> width_perturb(-width_tol,width_tol);
   		std::uniform_int_distribution<int> height_perturb(-height_tol,height_tol);
   		std::uniform_int_distribution<int> dist_perturb(-dist_tol,dist_tol);				
@@ -581,12 +646,14 @@
 		else{
 			double i_glob = 0;
 			int count = 0;
-			for(unsigned i=1; i<l.ny; i++){
-				double u_initial = Vmax * pow( ((double)i)/l.ny,1.0/7);
-				double i_loc = (sqrt(pow(l.get_node(0,i).v(),2) + pow(l.get_node(0,i).u() - u_initial,2)) )/ u_initial;
-				//std::cout << "local i is: " << i_loc << std::endl;
-				i_glob += i_loc;
-				count++;
+			for(unsigned i=0; i<l.ny; i++){
+				if(!l.get_node(0,i).has_flag_property("wall")){
+					double u_initial = Vmax * pow( ((double)i)/l.ny,1.0/7);
+					double i_loc = (sqrt(pow(l.get_node(0,i).v(),2) + pow(l.get_node(0,i).u() - u_initial,2)) )/ u_initial;
+					//std::cout << "local i is: " << i_loc << std::endl;
+					i_glob += i_loc;
+					count++;
+				}
 			}
 
 			std::cout << "the averaged initial pertubation is: I_{avg} = " << i_glob / count << std::endl;
@@ -597,15 +664,35 @@
 	{
 		double i_glob = 0;
 		int count = 0;
-		for(unsigned i=1; i<l.ny; i++){
-			double u_initial = Vmax * pow( ((double)i)/l.ny,1.0/7);
-			double i_loc = (sqrt(pow(l.get_node(0,i).v(),2) + pow(l.get_node(0,i).u() - u_initial,2)) )/ u_initial;
-			//std::cout << "local i is: " << i_loc << std::endl;
-			i_glob += i_loc;
-			count++;
+		for(unsigned i=0; i<l.ny; i++){
+			if(!l.get_node(0,i).has_flag_property("wall")){
+				double u_initial = Vmax * pow( ((double)i)/l.ny,1.0/7);
+				double i_loc = (sqrt(pow(l.get_node(0,i).v(),2) + pow(l.get_node(0,i).u() - u_initial,2)) )/ u_initial;
+				//std::cout << "local i is: " << i_loc << std::endl;
+				i_glob += i_loc;
+				count++;
+			}
 		}
 
 		std::cout << "the averaged pertubation at time t: " << time << " is: I_{avg} = " << i_glob / count << std::endl;
+
+	}
+
+	void simulation::calc_stats_at_h(int h)
+	{
+		double i_glob = 0;
+		int count = 0;
+		for(unsigned i=0; i<l.nx; i++){
+			if(!l.get_node(i,h).has_flag_property("wall")){
+				double u_initial = Vmax * pow( ((double)h)/l.ny,1.0/7);
+				double i_loc = (sqrt(pow(l.get_node(i,h).v(),2) + pow(l.get_node(i,h).u() - u_initial,2)) )/ u_initial;
+				//std::cout << "local i is: " << i_loc << std::endl;
+				i_glob += i_loc;
+				count++;
+			}
+		}
+
+		std::cout << "the averaged pertubation at time t: " << time << " at height " << h << " is: I_{avg} = " << i_glob / count << std::endl;
 
 	}
 
