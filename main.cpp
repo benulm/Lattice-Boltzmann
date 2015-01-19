@@ -13,10 +13,11 @@ int main(int argc, char *argv[])
 
 	double vmax, visc, Hdivh;
 	unsigned nx, h, d, w, pert;
-
+	vmax = visc = Hdivh = nx = h = d = w = pert = 0;
 
 	if(argc < 9){
  		std::cout << "Call the programm: " << argv[0] << "[nx, visc, v_max, h(obstacle), H/h, width(obstacle), dist(obstacle), pertubation]" << std::endl; 
+ 		return 0;
 	}
     else {
         nx = atoi(argv[1]);
@@ -31,7 +32,7 @@ int main(int argc, char *argv[])
 
 	omp_set_num_threads(std::max(omp_get_max_threads(),omp_get_num_procs()));
 	
-	lb::simulation* sim = new lb::simulation(nx,(unsigned) (Hdivh * h),10000,vmax, visc);
+	lb::simulation* sim = new lb::simulation(nx,(unsigned) (Hdivh * h),1000,vmax, visc);
 	sim->initialize(w,h,d,pert);
 	std::cout << *sim << std::endl;
 

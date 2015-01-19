@@ -36,7 +36,7 @@
 				shift(velocity_set().size),
 				Re(_Re), 
 				Vmax(_Vmax),
-				visc( /*fill in your code here*/ visc_),
+				visc( /*fill in your code here*/ _Vmax*nx/_Re),
 				beta( /*fill in your code here*/ 1./(2.*visc/(velocity_set().cs*velocity_set().cs)+1.)),
 				time(0),
 				file_output(false), // set to true if you want to write files
@@ -348,7 +348,7 @@
 						for (unsigned k =0; k<9; ++k) {
 							f_old[k] = l.get_node(i,j).f(k);
 						}
-						
+
 
 						velocity_set().equilibrate(l.get_node(i,j));
 
@@ -451,6 +451,7 @@
 
 				//std::cout << "after wall bc" << l << std::endl;
 				collide();
+				//add_beni_force();
 
 
 
@@ -540,6 +541,9 @@
 			}
 
 
+		public: // Force calculations
+
+		void add_beni_force();
 
 
 
@@ -580,6 +584,45 @@
 
 
 
+
+	/////////////////////////////////////////////////////////////////////////
+	// Force term
+	void simulation::add_beni_force()
+	{
+		float_type rho = 0;
+
+		for (int j=0; j<static_cast<int>(l.ny); ++j)
+		{
+			for (int i=0; i<static_cast<int>(l.nx); ++i)
+			{
+				rho = l.get_node(i,j).rho();
+
+				double deltau = (2.0*visc*Vmax)/(pow(l.ny,(2.0))*rho);
+
+				float_type f_old[9];
+				for (unsigned k =0; k<9; ++k) {
+					f_old[k] = l.get_node(i,j).f(k);
+				}
+
+				velocity_set().equilibrate(l.get_node(i,j),rho,l.get_node(i,j).u() + deltau, l.get_node(i,j).v());
+				
+				for (unsigned k =0; k<9; ++k) {
+					f_old[k] += l.get_node(i,j).f(k);
+				}
+
+				velocity_set().equilibrate(l.get_node(i,j),rho,l.get_node(i,j).u(), l.get_node(i,j).v());
+
+				for (unsigned k =0; k<9; ++k) {
+					l.get_node(i,j).f(k) = f_old[k] - l.get_node(i,j).f(k);
+				}
+
+
+				
+
+				
+			}
+		}
+	}
 
 
 
