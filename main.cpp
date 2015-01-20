@@ -32,7 +32,7 @@ int main(int argc, char *argv[])
 
 	omp_set_num_threads(std::max(omp_get_max_threads(),omp_get_num_procs()));
 	
-	lb::simulation* sim = new lb::simulation(nx,(unsigned) (Hdivh * h),1000,vmax, visc);
+	lb::simulation* sim = new lb::simulation(nx,(unsigned) (Hdivh * h),nx*vmax/visc,vmax, visc);
 	sim->initialize(w,h,d,pert);
 	std::cout << *sim << std::endl;
 

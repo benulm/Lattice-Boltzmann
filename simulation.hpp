@@ -9,6 +9,10 @@
 #include "H_root.hpp"
 #include "lattice.hpp"
 #include <sstream>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string>
+#include <fstream>
 
 	namespace lb {
 
@@ -36,15 +40,15 @@
 				shift(velocity_set().size),
 				Re(_Re), 
 				Vmax(_Vmax),
-				visc( /*fill in your code here*/ _Vmax*nx/_Re),
+				visc( /*fill in your code here*/ visc_),
 				beta( /*fill in your code here*/ 1./(2.*visc/(velocity_set().cs*velocity_set().cs)+1.)),
 				time(0),
 				file_output(false), // set to true if you want to write files
 				output_freq(100),
 				output_index(0),
 				// Random number generators for pertubation
-				distrx(-0.02,0.02),
-				distry(-0.01,0.01),
+				distrx(-0.0,0.0),
+				distry(-0.0,0.0),
 				g1(712)
 		{ 
 			// define amount to shift populations for advection
@@ -93,7 +97,7 @@
                 // topwall.j = l.ny-1;
                 // add_obstacle(1,l.nx,topwall);
 
-                add_roughness(h,w,d,perturb,perturb,perturb);
+                //add_roughness(h,w,d,perturb,perturb,perturb);
 
                 /*
                 coordinate<int> first;
@@ -108,7 +112,7 @@
                     {
                         double y = l.get_node(i,j).coord.j;
 
-                        double vlenght = Vmax * pow((y/l.ny),1.0/7);
+                        double vlenght = Vmax * pow((y/l.ny),1.0/7.);
                         double disturb_x = distrx(g1); /* [-0.01, 0.01] */
                         double disturb_y = distry(g1); /* [-0.02, 0.02] */
                             l.get_node(i,j).u()   = vlenght + (vlenght * disturb_x);
@@ -451,7 +455,7 @@
 
 				//std::cout << "after wall bc" << l << std::endl;
 				collide();
-				//add_beni_force();
+				add_body_force();
 
 
 
@@ -464,9 +468,41 @@
 
 				++time;
 
+				int print = 1000;
+				
+				if ((time-1)%print==0) {
+					std::stringstream ss;
+					ss << time;
+					std::string ts = ss.str();
+				std::string tss = "output/"+(ts)+"u_profile.dat";
+
+				std::ofstream ofstr(tss.c_str(), std::ofstream::trunc);
+
+					for (unsigned h=2; h<l.ny ; h++) {
+						ofstr <<h <<","<<calc_stats_u_h(h) << std::endl;
+					}
+
+				ofstr.close();
+
+				}
+
+				int print2 = 100;
+
+				if ((time-1)%print2==0) {
+					std::ofstream ofstr("output/u_h.dat", std::ofstream::app);
+					ofstr <<time << "," << calc_stats_u_h(20) << std::endl;
+				}
+
+
+
+
+
+
+
 				//calc_stats_averaged();
 
-				calc_stats_at_h(15);
+				//calc_stats_at_h(15);
+
 
 			}
 
@@ -543,7 +579,7 @@
 
 		public: // Force calculations
 
-		void add_beni_force();
+		void add_body_force();
 
 
 
@@ -558,6 +594,9 @@
 			int average_speed_averaged();
 
 			void calc_stats_at_h(int h);
+
+			double calc_stats_u_h(int h);
+
 
 
 		public: // members
@@ -586,8 +625,13 @@
 
 
 	/////////////////////////////////////////////////////////////////////////
-	// Force term
-	void simulation::add_beni_force()
+	// Force term:
+	// delta u = F/rho dt							(1)
+	// (half) pipe flow: dp/dz= -4*u_max*mu/(h^2)	(2)
+	// pressure gradient force: a = -1/rho*dp/dz	(3)
+	// (1),(2) in (3): delta u = 4*nu/rho*u_max/(h^2)*dt
+	/////////////////////////////////////////////////////////////////////////
+	void simulation::add_body_force()
 	{
 		float_type rho = 0;
 
@@ -596,8 +640,13 @@
 			for (int i=0; i<static_cast<int>(l.nx); ++i)
 			{
 				rho = l.get_node(i,j).rho();
+				
+				//double deltau = 0.568*(4.0*visc*Vmax)/(pow(l.ny,(2.0))*rho);
+				double deltau = 0.5*(4.0*visc*Vmax)/(pow(l.ny,(2.0))*rho);
 
-				double deltau = (2.0*visc*Vmax)/(pow(l.ny,(2.0))*rho);
+				//double deltau = (4.0*visc*Vmax)/(pow(l.ny,(2.0))*rho);
+				//std::cout << "Delta u = " << deltau << std::endl;
+				//double deltau = 1e-6;
 
 				float_type f_old[9];
 				for (unsigned k =0; k<9; ++k) {
@@ -614,12 +663,7 @@
 
 				for (unsigned k =0; k<9; ++k) {
 					l.get_node(i,j).f(k) = f_old[k] - l.get_node(i,j).f(k);
-				}
-
-
-				
-
-				
+				}				
 			}
 		}
 	}
@@ -738,6 +782,24 @@
 		std::cout << "the averaged pertubation at time t: " << time << " at height " << h << " is: I_{avg} = " << i_glob / count << std::endl;
 
 	}
+
+	double simulation::calc_stats_u_h(int h)
+	{
+		double u_glob = 0;
+		int count = 0;
+		for(unsigned i=0; i<l.nx; i++){
+			if(!l.get_node(i,h).has_flag_property("wall")){
+				u_glob += l.get_node(i,h).u();
+				count++;
+			}
+		}
+
+		return u_glob/count;
+
+	}
+
+
+	
 
 } // lb
 
