@@ -1,8 +1,8 @@
-/** 
- *  @file
- *  @author Fabian Bösch
- *  @brief simulation
- */
+	/** 
+	 *  @file
+	 *  @author Fabian Bösch
+	 *  @brief simulation
+	 */
 
 #ifndef LB_SIMULATION_HPP_INCLUDED
 #define LB_SIMULATION_HPP_INCLUDED
@@ -13,27 +13,29 @@
 #include <stdlib.h>
 #include <string>
 #include <fstream>
+#include <boost/math/tools/roots.hpp>
 
-namespace lb {
 
-	/**
-	 *  @brief Simulation class implementing LB
-	 * 
-	 *  This class holds a lattice as member (see @ref simulation::l) and 
-	 *  carries out the simulation steps on top of it. The main methods of 
-	 *  this class are @ref simulation::advect() and 
-	 *  @ref simulation::collide().
-	 */
-	class simulation
-	{
-		public: // ctor
+	namespace lb {
 
-			/**
-			 *  @brief Construct from domain size and flow parameters
-			 *  @param[in] nx    extent in x direction
-			 *  @param[in] ny    extent in y direction
-			 *  @param[in] _Re   Reynolds number
-			 *  @param[in] _Vmax mean flow velocity
+		/**
+		 *  @brief Simulation class implementing LB
+		 * 
+		 *  This class holds a lattice as member (see @ref simulation::l) and 
+		 *  carries out the simulation steps on top of it. The main methods of 
+		 *  this class are @ref simulation::advect() and 
+		 *  @ref simulation::collide().
+		 */
+		class simulation
+		{
+			public: // ctor
+
+				/**
+				 *  @brief Construct from domain size and flow parameters
+				 *  @param[in] nx    extent in x direction
+				 *  @param[in] ny    extent in y direction
+				 *  @param[in] _Re   Reynolds number
+				 *  @param[in] _Vmax mean flow velocity
 			 */
 			simulation(unsigned int nx, unsigned int ny, float_type _Re, float_type _Vmax, double visc_)
 				: l(nx, ny), 
@@ -69,67 +71,67 @@ namespace lb {
 			 *  Initialization includes defining initial density, velocity and
 			 *  populations. You can use Taylor-Green vortex flow conditions.
 			 */
-			void initialize(int w, int h, int d, int perturb)
-			{
+			  void initialize(int w, int h, int d, int perturb)
+            {
 
-				//const float_type pi(std::acos(-1.0));
-				// **************************
-				// * fill in your code here *
-				/*
-				   const float_type lambda_x = 1.;
-				   const float_type lambda_y = 1.;
-				   const float_type K_x = 2.*pi/l.nx/lambda_x;
-				   const float_type K_y = 2.*pi/l.ny/lambda_y;
-				   const float_type K2 = K_x*K_x+K_y*K_y;
-				   const float_type Ma = Vmax/velocity_set().cs;
-				 */
+                //const float_type pi(std::acos(-1.0));
+                // **************************
+                // * fill in your code here *
+                /*
+                const float_type lambda_x = 1.;
+                const float_type lambda_y = 1.;
+                const float_type K_x = 2.*pi/l.nx/lambda_x;
+                const float_type K_y = 2.*pi/l.ny/lambda_y;
+                const float_type K2 = K_x*K_x+K_y*K_y;
+                const float_type Ma = Vmax/velocity_set().cs;
+                */
 
-				/* height s.t 0.9* vmax at 10*heightmax of obstacles*/
+                /* height s.t 0.9* vmax at 10*heightmax of obstacles*/
 
 
-				coordinate<int> botwall;
-				botwall.i=0;
-				botwall.j=0;
-				add_obstacle(1,l.nx,botwall);
+                coordinate<int> botwall;
+                botwall.i=0;
+                botwall.j=0;
+                add_obstacle(1,l.nx,botwall);
 
-				// coordinate<int> topwall;
-				// topwall.i = 0;
-				// topwall.j = l.ny-1;
-				// add_obstacle(1,l.nx,topwall);
+                // coordinate<int> topwall;
+                // topwall.i = 0;
+                // topwall.j = l.ny-1;
+                // add_obstacle(1,l.nx,topwall);
 
-				//add_roughness(h,w,d,perturb,perturb,perturb);
+                //add_roughness(h,w,d,perturb,perturb,perturb);
 
-				/*
-				   coordinate<int> first;
-				   first.i = 50;
-				   first.j = 50;
-				   add_obstacle(20,20,first);
-				 */
+                /*
+                coordinate<int> first;
+                first.i = 50;
+                first.j = 50;
+                add_obstacle(20,20,first);
+                */
 
-				for (int j=0; j<static_cast<int>(l.ny); ++j)
-				{
-					for (int i=0; i<static_cast<int>(l.nx); ++i)
-					{
-						double y = l.get_node(i,j).coord.j;
+                for (int j=0; j<static_cast<int>(l.ny); ++j)
+                {
+                    for (int i=0; i<static_cast<int>(l.nx); ++i)
+                    {
+                        double y = l.get_node(i,j).coord.j;
 
-						double vlenght = Vmax * pow((y/l.ny),1.0/7.);
-						double disturb_x = distrx(g1); /* [-0.01, 0.01] */
-						double disturb_y = distry(g1); /* [-0.02, 0.02] */
-						l.get_node(i,j).u()   = vlenght + (vlenght * disturb_x);
-						l.get_node(i,j).v()   = 0 + (vlenght* disturb_y);
-						l.get_node(i,j).rho() = 1;
+                        double vlenght = Vmax * pow((y/l.ny),1.0/7.);
+                        double disturb_x = distrx(g1); /* [-0.01, 0.01] */
+                        double disturb_y = distry(g1); /* [-0.02, 0.02] */
+                            l.get_node(i,j).u()   = vlenght + (vlenght * disturb_x);
+                            l.get_node(i,j).v()   = 0 + (vlenght* disturb_y);
+                            l.get_node(i,j).rho() = 1;
 
-						velocity_set().equilibrate(l.get_node(i,j));
-						// double rhosum = 0;
-						// for(int p=0; p<9 ;p++){
-						//     rhosum += l.get_node(i,j).f(p);
-						// }
-						//std::cout << " node ("  << i << " , " << j << ") has rho: " << rhosum << std::endl;
-						//std::cout << "node (" << i << " , " << j << ") has velocities \nu: " << l.get_node(i,j).u() << "\nv:" << l.get_node(i,j).v() << std::endl << std::endl;
-					}
-				}
-				// **************************
-			} 
+                        velocity_set().equilibrate(l.get_node(i,j));
+                        // double rhosum = 0;
+                        // for(int p=0; p<9 ;p++){
+                        //     rhosum += l.get_node(i,j).f(p);
+                        // }
+                        //std::cout << " node ("  << i << " , " << j << ") has rho: " << rhosum << std::endl;
+                        //std::cout << "node (" << i << " , " << j << ") has velocities \nu: " << l.get_node(i,j).u() << "\nv:" << l.get_node(i,j).v() << std::endl << std::endl;
+                    }
+                }
+                // **************************
+            } 
 			// void initialize()
 			// {
 
@@ -172,14 +174,14 @@ namespace lb {
 			// 		for (int i=0; i<static_cast<int>(l.nx); ++i)
 			// 		{	
 			// 			double y = l.get_node(i,j).coord.j;
-
+						
 			// 			double vlenght = Vmax * pow((y/l.ny),1.0/7);
 			// 			double disturb_x = distrx(g1); /* [-0.01, 0.01] */ 
 			// 			double disturb_y = distry(g1); /* [-0.02, 0.02] */
 			// 				l.get_node(i,j).u()   = vlenght + (vlenght * disturb_x);
 			// 				l.get_node(i,j).v()   = 0 +        (vlenght* disturb_y);
 			// 				l.get_node(i,j).rho() = 1;
-
+						
 			// 			velocity_set().equilibrate(l.get_node(i,j));
 			// 			// double rhosum = 0;
 			// 			// for(int p=0; p<9 ;p++){
@@ -367,6 +369,63 @@ namespace lb {
 
 			}
 
+			void collide_entropic()
+			{
+				//update_u_rho();
+				// **************************
+				// * fill in your code here *
+				for (int j=0; j<static_cast<int>(l.ny); ++j)
+				{
+					for (int i=0; i<static_cast<int>(l.nx); ++i)
+					{
+						float_type f_old[9];
+						for (unsigned k =0; k<9; ++k) {
+							f_old[k] = l.get_node(i,j).f(k);
+						}
+
+						
+						velocity_set().equilibrate(l.get_node(i,j));
+						
+						double alpha = 2.;
+						
+						if(!l.get_node(i,j).has_flag_property("wall")){
+						auto entropy = [&](double a){
+							double ret =0;
+							for (unsigned k =0; k<9; ++k) {
+								ret +=
+								(f_old[k]+a*(l.get_node(i,j).f(k)))*log((f_old[k]+a*(l.get_node(i,j).f(k)-f_old[k]))/velocity_set().W[k])-f_old[k]*log(f_old[k]/velocity_set().W[k]);
+							}
+							return ret;
+						};
+
+						//std::cout<<entropy(0.5) << std::endl;
+						//std::cout<<entropy(1.) << std::endl;
+						/*
+						for (double l=-4.; l<4; l+=0.1){
+							std::cout<<l << "\t" << entropy(l) << std::endl;							
+						}*/
+
+
+						typedef std::pair<double, double> Result;
+    					boost::uintmax_t max_iter=50000;
+    					boost::math::tools::eps_tolerance<double> tol(30);
+						Result r1 = boost::math::tools::toms748_solve(entropy, -0.1,4., tol, max_iter);
+						alpha=r1.first;
+						std::cout << "alpha("<<i<<","<<j<<") = " << alpha << std::endl;
+						}
+
+						for (unsigned k =0; k<9; ++k) {
+							l.get_node(i,j).f(k) = f_old[k]+alpha*beta*(l.get_node(i,j).f(k)-f_old[k]);
+						}
+					}
+				}
+
+
+				// **************************
+
+			}
+
+
 			void accumulate_rho()
 			{
 				int count = 0;
@@ -408,7 +467,7 @@ namespace lb {
 							u_temp += l.get_node(i,j).f(k)*velocity_set().cx[k];
 							v_temp += l.get_node(i,j).f(k)*velocity_set().cy[k];
 						}
-
+						
 						u_temp /= rho;
 						v_temp /= rho;
 
@@ -419,17 +478,17 @@ namespace lb {
 						// if ( j == 7 && i == 7) {
 						// 	std::cout << "u_temp = " << u_temp << std::endl;
 						// }
-
+						
 						l.get_node(i,j).u() = u_temp;
 						l.get_node(i,j).v() = v_temp;
 
+						
 
-
-
+						
 					}
 				}
 
-
+		
 
 
 
@@ -440,7 +499,7 @@ namespace lb {
 			/** @brief LB step */
 			void step()
 			{
-
+				std::cout << "STEP starts" << std::endl;	
 				//update_u_rho();	
 
 				// accumulate_rho();
@@ -455,8 +514,7 @@ namespace lb {
 
 				//std::cout << "after wall bc" << l << std::endl;
 				//collide();
-				collision_with_kc_and_evtl_b();
-
+				collide_entropic();
 				add_body_force();
 
 
@@ -471,20 +529,20 @@ namespace lb {
 				++time;
 
 				int print = 1000;
-
+				
 				if ((time-1)%print==0) {
 					std::stringstream ss;
 					ss << time;
 					std::string ts = ss.str();
-					std::string tss = "output/"+(ts)+"u_profile.dat";
+				std::string tss = "output/"+(ts)+"u_profile.dat";
 
-					std::ofstream ofstr(tss.c_str(), std::ofstream::trunc);
+				std::ofstream ofstr(tss.c_str(), std::ofstream::trunc);
 
 					for (unsigned h=2; h<l.ny ; h++) {
 						ofstr <<h <<","<<calc_stats_u_h(h) << std::endl;
 					}
 
-					ofstr.close();
+				ofstr.close();
 
 				}
 
@@ -581,13 +639,13 @@ namespace lb {
 
 		public: // Force calculations
 
-			void add_body_force();
+		void add_body_force();
 
 
 
 		public: 
 			void add_roughness(int height, int width, int dist, int width_tol, int height_tol, int dist_tol);
-
+		
 			// Statistics
 			void initial_statistics_averaged();
 
@@ -600,6 +658,8 @@ namespace lb {
 			double calc_stats_u_h(int h);
 
 			void collision_with_kc_and_evtl_b();
+
+
 
 
 		public: // members
@@ -643,7 +703,7 @@ namespace lb {
 			for (int i=0; i<static_cast<int>(l.nx); ++i)
 			{
 				rho = l.get_node(i,j).rho();
-
+				
 				//double deltau = 0.568*(4.0*visc*Vmax)/(pow(l.ny,(2.0))*rho);
 				double deltau = 0.5*(4.0*visc*Vmax)/(pow(l.ny,(2.0))*rho);
 
@@ -657,7 +717,7 @@ namespace lb {
 				}
 
 				velocity_set().equilibrate(l.get_node(i,j),rho,l.get_node(i,j).u() + deltau, l.get_node(i,j).v());
-
+				
 				for (unsigned k =0; k<9; ++k) {
 					f_old[k] += l.get_node(i,j).f(k);
 				}
@@ -679,10 +739,10 @@ namespace lb {
 	void simulation::add_roughness(int height, int width, int dist, int width_tol = 0, int height_tol = 0, int dist_tol	= 0)
 	{
 		std::default_random_engine generator(712);
-
-		std::uniform_int_distribution<int> width_perturb(-width_tol,width_tol);
-		std::uniform_int_distribution<int> height_perturb(-height_tol,height_tol);
-		std::uniform_int_distribution<int> dist_perturb(-dist_tol,dist_tol);				
+		
+  		std::uniform_int_distribution<int> width_perturb(-width_tol,width_tol);
+  		std::uniform_int_distribution<int> height_perturb(-height_tol,height_tol);
+  		std::uniform_int_distribution<int> dist_perturb(-dist_tol,dist_tol);				
 
 
 
@@ -968,12 +1028,12 @@ namespace lb {
 
 	}
 
-	// void set_pq(int moment, int &p, int &q){
-	// 	p = (moment - (moment % 3))/3;
-	// 	q = moment % 3;
-	// }
 
+	
 
 } // lb
 
-#endif // LB_SIMULATION_HPP_INCLUDEDhttp://www.cplusplus.com/reference/cmath/
+
+
+
+#endif // LB_SIMULATION_HPP_INCLUDED

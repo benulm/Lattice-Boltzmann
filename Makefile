@@ -15,7 +15,7 @@ df = $(DEPDIR)/$(*F)
 
 # Compiler flags settings
 CC = g++
-CFLAGS = -O3 -std=c++11 -fopenmp -Wall
+CFLAGS = -O3 -std=c++11 -fopenmp -Wall -I ~/my_libs/boost_1_57_0
 VISFLAG = -DUSE_OPENGL_VISUALIZATION
 LDFLAGS = -lgomp -lglut -lGLU -lGL -lGLEW -lX11 
 #-lgomp -lGLEW -lGL -lGLU -lglut -lX11
