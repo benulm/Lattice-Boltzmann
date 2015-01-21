@@ -33,6 +33,7 @@ int main(int argc, char *argv[])
 	omp_set_num_threads(std::max(omp_get_max_threads(),omp_get_num_procs()));
 	
 	lb::simulation* sim = new lb::simulation(nx,(unsigned) (Hdivh * h),vmax, visc);
+	//lb::simulation* sim = new lb::simulation(50,50,vmax, visc);
 	sim->initialize(w,h,d,pert);
 	std::cout << *sim << std::endl;
 
@@ -46,11 +47,21 @@ int main(int argc, char *argv[])
 	
 	#else
 	
+
+
+		// std::cout << sim->l << std::endl;
+		// sim->step();
+		// std::cout << sim->l << std::endl;
+
+		sim->write_vtk(0);
 	
-		for (unsigned int i=0; i<1; ++i){
+		for (unsigned int i=1; i<201; ++i){
 			sim->step();
+			// if(i%1000 == 0)
+				sim->write_vtk(i);
 			//std::cout << "step = " << i << std::endl;
 		}
+
 
 		//sim->write_vtk(2000);
 

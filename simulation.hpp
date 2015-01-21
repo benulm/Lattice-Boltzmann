@@ -78,7 +78,7 @@
 			 	botwall.j=0;
 			 	add_obstacle(1,l.nx,botwall);
 
-                //add_roughness(h,w,d,perturb,perturb,perturb);
+                // add_roughness(h,w,d,perturb,perturb,perturb);
 
                 // Set initial atmospheric velocity profile : 	u = y^(1/7) + disturbance*y^(1/7)
                 //												v = 0 + disturbance*y^(1/7)
@@ -98,6 +98,18 @@
 			 			velocity_set().equilibrate(l.get_node(i,j));
 			 		}
 			 	}
+
+			 	update_u_rho();
+			 	for (int j=0; j<static_cast<int>(l.ny); ++j)
+			 	{
+			 		for (int i=0; i<static_cast<int>(l.nx); ++i)
+			 		{
+			 			double y = l.get_node(i,j).coord.j;
+			 			double x = l.get_node(i,j).coord.i;
+			 				std::cout <<  "at coords(x,y) = (" << x << " , " << y << ") , the u val is: " << l.get_node(i,j).u() << std::endl;
+			 				std::cout <<  "at coords(x,y) = (" << x << " , " << y << ") , the v val is: " << l.get_node(i,j).v() << std::endl;
+			 		}
+			 	}
 			 } 
 
 			/** 
@@ -105,24 +117,41 @@
 			 *  
 			 *  Include periodic boundary conditions here also
 			 */
+
 			 void advect()
 			 {
+			 	// int forward = 0;
+			 	// int backward = 0;
+
 			 	for (unsigned i=0; i<9; ++i){
 			 		if(shift[i]>0) {
-						for (auto it = l.end()-1; it>l.begin(); --it) {//backward loop
+			 			// if(backward == 0){
+			 			// 	std::cout << "backward loop \n\n" << std::endl;
+			 			// }
+						for (auto it = l.end()-1; it>=l.begin(); --it) {//backward loop
+							// if(backward==0)
+							// 	std::cout << "iterator at coords:" << it->coord.i << " , " << (*it).coord.j << std::endl;
 							if(it + shift[i] < l.end())
 								(it+shift[i])->f(i) = it->f(i);
 						}
+
+						// backward =1;
 					}
 				}
 
 
 				for (unsigned i=0; i<9; ++i){
 					if(shift[i]<0) {
-						for (auto it = l.begin()+1; it<l.end(); ++it) {//forward loop
+			 			// if(forward == 0){
+			 			// 	std::cout << "backward loop \n\n" << std::endl;
+			 			// }
+						for (auto it = l.begin(); it<l.end(); ++it) {//forward loop
+							// if(forward==0)
+							// 	std::cout << "iterator at coords:" << it->coord.i << " , " << (*it).coord.j << std::endl;
 							if(it + shift[i] >= l.begin())							
 								(it+shift[i])->f(i) = it->f(i);
 						}
+						// forward = 1;
 					}
 
 				}
@@ -280,6 +309,19 @@
 
 				collide();
 
+			 	// for (int j=0; j<static_cast<int>(l.ny); ++j)
+			 	// {
+			 	// 	for (int i=0; i<static_cast<int>(l.nx); ++i)
+			 	// 	{
+			 	// 		double y = l.get_node(i,j).coord.j;
+			 	// 		double x = l.get_node(i,j).coord.i;
+			 	// 			std::cout <<  "at coords(x,y) = (" << x << " , " << y << ") , the u val is: " << l.get_node(i,j).u() << std::endl;
+			 	// 			std::cout <<  "at coords(x,y) = (" << x << " , " << y << ") , the v val is: " << l.get_node(i,j).v() << std::endl;
+			 	// 	}
+			 	// }
+
+				
+
 				add_body_force();
 
 				// file io
@@ -311,10 +353,10 @@
 
 				int print2 = 100;
 
-				if ((time-1)%print2==0) {
-					std::ofstream ofstr("output/u_h.dat", std::ofstream::app);
-					ofstr <<time << "," << calc_stats_u_h(20) << std::endl;
-				}
+				// if ((time-1)%print2==0) {
+				// 	std::ofstream ofstr("output/u_h.dat", std::ofstream::app);
+				// 	ofstr <<time << "," << calc_stats_u_h(20) << std::endl;
+				// }
 
 			}
 
@@ -613,8 +655,8 @@
 		{
 			for(unsigned i=0;i<l.nx;i++){
 				l.get_node(i,l.ny-1).f(4) = l.get_node(i,l.ny).f(2);
-				l.get_node(i,l.ny-1).f(8) = l.get_node(i-1,l.ny).f(5);
-				l.get_node(i,l.ny-1).f(7) = l.get_node(i+1,l.ny).f(6);
+				l.get_node(i,l.ny-1).f(8) = l.get_node(i+1,l.ny).f(5);
+				l.get_node(i,l.ny-1).f(7) = l.get_node(i-1,l.ny).f(6);
 			}
 		}
 
