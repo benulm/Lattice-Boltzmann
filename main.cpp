@@ -53,14 +53,16 @@ int main(int argc, char *argv[])
 		// sim->step();
 		// std::cout << sim->l << std::endl;
 
-		sim->write_vtk(0);
+		//sim->write_vtk(0);
 	
-		for (unsigned int i=1; i<201; ++i){
+	
+		for (unsigned int i=1; i<20001; ++i){
 			sim->step();
 			// if(i%1000 == 0)
-				sim->write_vtk(i);
+				//sim->write_vtk(i);
 			//std::cout << "step = " << i << std::endl;
 		}
+		
 
 
 		//sim->write_vtk(2000);

@@ -78,7 +78,7 @@
 			 	botwall.j=0;
 			 	add_obstacle(1,l.nx,botwall);
 
-                // add_roughness(h,w,d,perturb,perturb,perturb);
+                 add_roughness(h,w,d,perturb,perturb,perturb);
 
                 // Set initial atmospheric velocity profile : 	u = y^(1/7) + disturbance*y^(1/7)
                 //												v = 0 + disturbance*y^(1/7)
@@ -92,6 +92,7 @@
                         double disturb_x = distrx(g1); /* [-0.01, 0.01] */
                         double disturb_y = distry(g1); /* [-0.02, 0.02] */
 			 			l.get_node(i,j).u()   = vlenght + (vlenght * disturb_x);
+						//l.get_node(i,j).u() = Vmax;
 			 			l.get_node(i,j).v()   = 0 + (vlenght* disturb_y);
 			 			l.get_node(i,j).rho() = 1;
 
@@ -100,16 +101,18 @@
 			 	}
 
 			 	update_u_rho();
+				/* DEBUG
 			 	for (int j=0; j<static_cast<int>(l.ny); ++j)
 			 	{
 			 		for (int i=0; i<static_cast<int>(l.nx); ++i)
 			 		{
 			 			double y = l.get_node(i,j).coord.j;
 			 			double x = l.get_node(i,j).coord.i;
-			 				std::cout <<  "at coords(x,y) = (" << x << " , " << y << ") , the u val is: " << l.get_node(i,j).u() << std::endl;
-			 				std::cout <<  "at coords(x,y) = (" << x << " , " << y << ") , the v val is: " << l.get_node(i,j).v() << std::endl;
+			 			std::cout <<  "at coords(x,y) = (" << x << " , " << y << ") , the u val is: " << l.get_node(i,j).u() << std::endl;
+			 			std::cout <<  "at coords(x,y) = (" << x << " , " << y << ") , the v val is: " << l.get_node(i,j).v() << std::endl;
 			 		}
 			 	}
+				*/
 			 } 
 
 			/** 
@@ -299,7 +302,7 @@
 			/** @brief LB step */
 			void step()
 			{
-				std::cout << "STEP starts" << std::endl;	
+				//std::cout << "STEP starts" << std::endl;	
 				advect();
 
 				wall_bc();
@@ -325,16 +328,17 @@
 				add_body_force();
 
 				// file io
+				/*
 				if ( file_output && ( ((time+1) % output_freq) == 0 || time == 0 ) )
 				{
 					write_fields();
 					++output_index;
-				}
+				}*/
 
 				++time;
 
 				int print = 1000;
-				
+			/*	
 				if ((time-1)%print==0) {
 					std::stringstream ss;
 					ss << time;
@@ -352,11 +356,11 @@
 				}
 
 				int print2 = 100;
-
-				// if ((time-1)%print2==0) {
-				// 	std::ofstream ofstr("output/u_h.dat", std::ofstream::app);
-				// 	ofstr <<time << "," << calc_stats_u_h(20) << std::endl;
-				// }
+				 if ((time-1)%print2==0) {
+				 	std::ofstream ofstr("output/u_h.dat", std::ofstream::app);
+				 	ofstr <<time << "," << calc_stats_u_h(20) << std::endl;
+				 }
+				 */
 
 			}
 
