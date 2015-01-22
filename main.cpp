@@ -50,18 +50,21 @@ int main(int argc, char *argv[])
 
 
 		// std::cout << sim->l << std::endl;
+		std::cout << "\n\n\n\n\n" << std::endl;
+		sim->step();
+		// std::cout << "\n\n\n\n\n" << std::endl;
 		// sim->step();
 		// std::cout << sim->l << std::endl;
 
 		//sim->write_vtk(0);
 	
 	
-		for (unsigned int i=1; i<2000001; ++i){
-			sim->step();
-			// if(i%1000 == 0)
-				//sim->write_vtk(i);
-			//std::cout << "step = " << i << std::endl;
-		}
+		// for (unsigned int i=1; i<2000001; ++i){
+		// 	sim->step();
+		// 	// if(i%1000 == 0)
+		// 		//sim->write_vtk(i);
+		// 	//std::cout << "step = " << i << std::endl;
+		// }
 		
 
 
