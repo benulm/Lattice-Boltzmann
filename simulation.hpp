@@ -72,13 +72,13 @@
 			 */
 			 void initialize(int w, int h, int d, int perturb)
 			 {
-
+				//add bottom wall
 			 	coordinate<int> botwall;
 			 	botwall.i=0;
 			 	botwall.j=0;
 			 	add_obstacle(1,l.nx,botwall);
 
-                 add_roughness(h,w,d,perturb,perturb,perturb);
+                // add_roughness(h,w,d,perturb,perturb,perturb);
 
                 // Set initial atmospheric velocity profile : 	u = y^(1/7) + disturbance*y^(1/7)
                 //												v = 0 + disturbance*y^(1/7)
@@ -338,7 +338,7 @@
 				++time;
 
 				int print = 1000;
-			/*	
+			
 				if ((time-1)%print==0) {
 					std::stringstream ss;
 					ss << time;
@@ -360,7 +360,7 @@
 				 	std::ofstream ofstr("output/u_h.dat", std::ofstream::app);
 				 	ofstr <<time << "," << calc_stats_u_h(20) << std::endl;
 				 }
-				 */
+				 
 
 			}
 
@@ -506,7 +506,7 @@
 					rho = l.get_node(i,j).rho();
 
 				//double deltau = 0.568*(4.0*visc*Vmax)/(pow(l.ny,(2.0))*rho);
-					double deltau = 0.5*(4.0*visc*Vmax)/(pow(l.ny,(2.0))*rho);
+					double deltau = (4.0*visc*Vmax)/(pow(l.ny,(2.0))*rho);
 
 				//double deltau = (4.0*visc*Vmax)/(pow(l.ny,(2.0))*rho);
 				//std::cout << "Delta u = " << deltau << std::endl;
