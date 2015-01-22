@@ -48,6 +48,7 @@ clean:
 	@rm -f $(OBJFILES)
 
 clean_output:
+	@echo -e"\033[1mRemoving output...\033[0m"
 	@rm -f ./output/*
 
 .PHONY: all build clean
