@@ -6,7 +6,7 @@ namespace lb
 
 	void simulation::collide()
 	{
-#pragma omp parallel for
+#pragma omp parallel for collapse (2)
 		for (int j=0; j<static_cast<int>(l.ny); ++j)
 		{
 			for (int i=0; i<static_cast<int>(l.nx); ++i)

@@ -816,7 +816,7 @@ main.o: main.cpp /usr/include/stdc-predef.h simulation.hpp H_root.hpp \
  /home/benjamin/my_libs/boost_1_57_0/boost/format/parsing.hpp \
  /home/benjamin/my_libs/boost_1_57_0/boost/format/free_funcs.hpp \
  /home/benjamin/my_libs/boost_1_57_0/boost/format/detail/unset_macros.hpp \
- standard_collide.hpp visualization.hpp opengl.hpp /usr/include/GL/glew.h \
+ entropic_collide.hpp visualization.hpp opengl.hpp /usr/include/GL/glew.h \
  /usr/include/GL/glu.h /usr/include/GL/gl.h /usr/include/GL/freeglut.h \
  /usr/include/GL/freeglut_std.h /usr/include/GL/freeglut_ext.h \
  /usr/include/X11/Xlib.h /usr/include/X11/X.h \
@@ -1645,7 +1645,7 @@ main.cpp /usr/include/stdc-predef.h simulation.hpp H_root.hpp :
  /home/benjamin/my_libs/boost_1_57_0/boost/format/parsing.hpp :
  /home/benjamin/my_libs/boost_1_57_0/boost/format/free_funcs.hpp :
  /home/benjamin/my_libs/boost_1_57_0/boost/format/detail/unset_macros.hpp :
- standard_collide.hpp visualization.hpp opengl.hpp /usr/include/GL/glew.h :
+ entropic_collide.hpp visualization.hpp opengl.hpp /usr/include/GL/glew.h :
  /usr/include/GL/glu.h /usr/include/GL/gl.h /usr/include/GL/freeglut.h :
  /usr/include/GL/freeglut_std.h /usr/include/GL/freeglut_ext.h :
  /usr/include/X11/Xlib.h /usr/include/X11/X.h :

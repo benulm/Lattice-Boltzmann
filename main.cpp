@@ -56,7 +56,7 @@ int main(int argc, char *argv[])
 		//sim->write_vtk(0);
 	
 	
-		for (unsigned int i=1; i<20001; ++i){
+		for (unsigned int i=1; i<2000001; ++i){
 			sim->step();
 			// if(i%1000 == 0)
 				//sim->write_vtk(i);

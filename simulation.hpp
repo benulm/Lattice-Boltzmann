@@ -48,8 +48,8 @@
 				output_freq(100),
 				output_index(0),
 				// Random number generators for pertubation
-				distrx(-0.0,0.0),
-				distry(-0.0,0.0),
+				distrx(-0.01,0.01),
+				distry(-0.02,0.02),
 				g1(712)
 				{ 
 			// define amount to shift populations for advection
@@ -78,7 +78,7 @@
 			 	botwall.j=0;
 			 	add_obstacle(1,l.nx,botwall);
 
-                // add_roughness(h,w,d,perturb,perturb,perturb);
+                 add_roughness(h,w,d,perturb,perturb,perturb);
 
                 // Set initial atmospheric velocity profile : 	u = y^(1/7) + disturbance*y^(1/7)
                 //												v = 0 + disturbance*y^(1/7)
@@ -126,6 +126,8 @@
 			 	// int forward = 0;
 			 	// int backward = 0;
 
+				
+#pragma omp parallel for
 			 	for (unsigned i=0; i<9; ++i){
 			 		if(shift[i]>0) {
 			 			// if(backward == 0){
@@ -143,6 +145,7 @@
 				}
 
 
+#pragma omp parallel for
 				for (unsigned i=0; i<9; ++i){
 					if(shift[i]<0) {
 			 			// if(forward == 0){
@@ -160,6 +163,8 @@
 				}
 
 				//apply Boundary Conditions
+
+#pragma omp parallel for
 				for (int i = 1; i < 9; ++i) {
 					if (i==1) { //east
 						for (unsigned k=0; k<l.ny; ++k) {
@@ -266,13 +271,15 @@
 
 			void update_u_rho() 
 			{
-				float_type rho = 0;
-				float_type u_temp, v_temp;
-
+				
+#pragma omp parallel for collapse (2)
 				for (int j=0; j<static_cast<int>(l.ny); ++j)
 				{
 					for (int i=0; i<static_cast<int>(l.nx); ++i)
 					{
+						float_type rho = 0;
+						float_type u_temp, v_temp;
+
 						//update rho
 						rho = 0;
 						u_temp = 0; v_temp = 0;
@@ -337,6 +344,7 @@
 
 				++time;
 
+				
 				int print = 1000;
 			
 				if ((time-1)%print==0) {
@@ -360,6 +368,23 @@
 				 	std::ofstream ofstr("output/u_h.dat", std::ofstream::app);
 				 	ofstr <<time << "," << calc_stats_u_h(20) << std::endl;
 				 }
+
+				 int print3 = 100;
+				  if ((time-1)%print3==0) {
+					std::stringstream ss;
+					ss << time;
+					std::string ts = ss.str();
+					std::string tss = "output/"+(ts)+"I_profile.dat";
+					std::ofstream ofstr(tss.c_str(), std::ofstream::trunc);
+
+					for (unsigned h=2; h<l.ny ; h++) {
+						ofstr <<h <<","<<calc_stats_at_h(h) << std::endl;
+					}
+					ofstr.close();
+
+				 }
+
+
 				 
 
 			}
@@ -458,7 +483,7 @@
 
 			int average_speed_averaged();
 
-			void calc_stats_at_h(int h);
+			double calc_stats_at_h(int h);
 
 			double calc_stats_u_h(int h);
 
@@ -497,12 +522,13 @@
 	/////////////////////////////////////////////////////////////////////////
 		void simulation::add_body_force()
 		{
-			float_type rho = 0;
-
+#pragma omp parallel for collapse (2)
 			for (int j=0; j<static_cast<int>(l.ny); ++j)
 			{
 				for (int i=0; i<static_cast<int>(l.nx); ++i)
 				{
+
+					float_type rho = 0;
 					rho = l.get_node(i,j).rho();
 
 				//double deltau = 0.568*(4.0*visc*Vmax)/(pow(l.ny,(2.0))*rho);
@@ -621,7 +647,7 @@
 
 		}
 
-		void simulation::calc_stats_at_h(int h)
+		double simulation::calc_stats_at_h(int h)
 		{
 			double i_glob = 0;
 			int count = 0;
@@ -634,8 +660,8 @@
 					count++;
 				}
 			}
-
-			std::cout << "the averaged pertubation at time t: " << time << " at height " << h << " is: I_{avg} = " << i_glob / count << std::endl;
+			return i_glob/count;
+			//std::cout << "the averaged pertubation at time t: " << time << " at height " << h << " is: I_{avg} = " << i_glob / count << std::endl;
 
 		}
 
@@ -667,8 +693,8 @@
 } // lb
 
 
-#include "standard_collide.hpp"
+//#include "standard_collide.hpp"
 // #include "kbc_collide.hpp"
-// #include "entropic_collide.hpp"
+ #include "entropic_collide.hpp"
 
 #endif // LB_SIMULATION_HPP_INCLUDED
