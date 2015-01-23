@@ -1,7 +1,8 @@
 #ifndef STANDARD_COLLIDE_
 #define STANDARD_COLLIDE_
 #include <iomanip>  
-#define COMPARE_
+
+#define FABIAN_
 
 
 #ifdef STELLIS_

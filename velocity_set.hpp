@@ -12,7 +12,7 @@
 #include <cmath>
 #include <vector>
 
-namespace lb {
+ namespace lb {
 
 	struct v9;                // forward declaration
 	const v9& velocity_set(); // forward declaration
@@ -31,25 +31,25 @@ namespace lb {
 	 */
 	struct v9 // singleton
 	{
-		private:
+	private:
 
 			/** @brief Default constructor */
-			v9(){};
+		v9(){};
 			/** @brief Function for instantiating the singleton is a friend */
-			friend const v9& lb::velocity_set();
+		friend const v9& lb::velocity_set();
 
-			float_type power(const float_type& a,const float_type& b) const{
-				if (b==0.) return 1.;
-				else if(b==1.) return a;
-				else if(b == -1.) return 1./a;
-				else std::cout << "general power operation!" << std::endl; return pow(a,b);
-			}
+		float_type power(const float_type& a,const float_type& b) const{
+			if (b==0.) return 1.;
+			else if(b==1.) return a;
+			else if(b == -1.) return 1./a;
+			else std::cout << "general power operation!" << std::endl; return pow(a,b);
+		}
 
 
-		public:
+	public:
 
-			v9(const v9&) = delete;
-			v9& operator=(const v9&) = delete;
+		v9(const v9&) = delete;
+		v9& operator=(const v9&) = delete;
 
 			//                                                     0,       1,       2,       3,       4,       5,       6,       7,       8
 			const std::array<float_type, 9>         W =   {{ 16.0/36,  4.0/36,  4.0/36,  4.0/36,  4.0/36,  1.0/36,  1.0/36,  1.0/36,  1.0/36}};   ///< Lattice weights
@@ -57,10 +57,10 @@ namespace lb {
 			const std::array<std::array<int, 9>, 2> c = {{{{       0,       1,       0,      -1,       0,       1,      -1,      -1,       1}}, 
 				{{       0,       0,       1,       0,      -1,       1,       1,      -1,      -1}}}}; ///< Molecular velocities
 
-			const std::array<float_type, 9> cx = {{       0,       1,       0,      -1,       0,       1,      -1,      -1,	1}};
+				const std::array<float_type, 9> cx = {{       0,       1,       0,      -1,       0,       1,      -1,      -1,	1}};
 
 
-			const std::array<float_type, 9> cy = {{       0,       0,       1,       0,      -1,       1,       1,      -1,      -1}}; 
+				const std::array<float_type, 9> cy = {{       0,       0,       1,       0,      -1,       1,       1,      -1,      -1}}; 
 
 			const float_type cs = 1.0/std::sqrt(3.0);   ///< Speed of sound
 
@@ -77,21 +77,26 @@ namespace lb {
 			 *  @param[in]     v    Local flow velocity in y-direction
 			 */
 
-			inline void f_eq(float_type* f_eq, float_type rho, float_type u, float_type v) const
-			{
-				// **************************
-				// * fill in your code here *
-				   for (unsigned i = 0; i<size; ++i){
-				   f_eq[i] = rho*W[i]*(2.-sqrt(1.+3.*u*u))*(2.-sqrt(1.+3.*v*v))*power((2.*u+sqrt(1.+3.*u*u))/(1.-u),cx[i])*power((2.*v+sqrt(1.+3.*v*v))/(1.-v),cy[i]);
-				   }
+			 inline void f_eq(float_type* f_eq, float_type rho, float_type u, float_type v) const
+			 {
+			 	for (unsigned i = 0; i<size; ++i){
+			 		f_eq[i] = rho*W[i]*(2.-sqrt(1.+3.*u*u))*(2.-sqrt(1.+3.*v*v))*power((2.*u+sqrt(1.+3.*u*u))/(1.-u),cx[i])*power((2.*v+sqrt(1.+3.*v*v))/(1.-v),cy[i]);
+			 	}
+				// f_eq[0] = (-2*rho*(-2 + 3*u*u + 3*v*v))/9.;
+				// f_eq[1] = (rho*(2 + 6*u + 6*u*u - 3*v*v))/18.;
+				// f_eq[2] = (rho*(2 - 3*u*u + 6*v + 6*v*v))/18. ;
+				// f_eq[3] = (rho*(2 - 6*u + 6*u*u - 3*v*v))/18.;
+				// f_eq[4] = (rho*(2 - 3*u*u - 6*v + 6*v*v))/18.;
+				// f_eq[5] = (rho*(1 + 3*u*u + 3*v + 3*v*v + u*(3 + 9*v)))/36.;
+				// f_eq[6] = (rho*(1 + 3*u*u + 3*v + 3*v*v - 3*u*(1 + 3*v)))/36.;
+				// f_eq[7] = (rho*(1 + 3*u*u - 3*v + 3*v*v + u*(-3 + 9*v)))/36.;
+				// f_eq[8] = (rho*(1 + 3*u*u + u*(3 - 9*v) - 3*v + 3*v*v))/36.;
+			 }
 
-				// **************************
-			}
-
-			inline float_type f_eq_one(float_type rho, float_type u, float_type v, int dir) const
-			{
-				   return rho*W[dir]*(2.-sqrt(1.+3.*u*u))*(2.-sqrt(1.+3.*v*v))*power((2.*u+sqrt(1.+3.*u*u))/(1.-u),cx[dir])*power((2.*v+sqrt(1.+3.*v*v))/(1.-v),cy[dir]);
-			}
+			 inline float_type f_eq_one(float_type rho, float_type u, float_type v, int dir) const
+			 {
+			 	return rho*W[dir]*(2.-sqrt(1.+3.*u*u))*(2.-sqrt(1.+3.*v*v))*power((2.*u+sqrt(1.+3.*u*u))/(1.-u),cx[dir])*power((2.*v+sqrt(1.+3.*v*v))/(1.-v),cy[dir]);
+			 }
 
 
 			/** 
@@ -107,19 +112,19 @@ namespace lb {
 			 *  @param[in]     v    Local flow velocity in y-direction
 			 */
 			template <typename Node>
-				inline void equilibrate(Node& n, float_type rho, float_type u, float_type v) const
-				{
+			 inline void equilibrate(Node& n, float_type rho, float_type u, float_type v) const
+			 {
 					// **************************
-					
-					float_type f_equil[9];
+
+			 	float_type f_equil[9];
 					// * fill in your code here *
-					f_eq(f_equil, rho, u, v);
-					for (unsigned i =0; i<size; ++i) {
-						n.f(i) = f_equil[i];
-					}
-					
+			 	f_eq(f_equil, rho, u, v);
+			 	for (unsigned i =0; i<size; ++i) {
+			 		n.f(i) = f_equil[i];
+			 	}
+
 					// **************************
-				}
+			 }
 
 			/** 
 			 *  @brief Equilibrate a node.
@@ -132,21 +137,21 @@ namespace lb {
 			 *  @param[in,out] n    Reference to a Node object
 			 */
 			template <typename Node>
-				inline void equilibrate(Node& n) const
-				{
-					return equilibrate(n, n.rho(), n.u(), n.v());
-				}
-	};
+			 inline void equilibrate(Node& n) const
+			 {
+			 	return equilibrate(n, n.rho(), n.u(), n.v());
+			 }
+			};
 
 	/**
 	 *  @brief Get a reference single instance of the velocity set.
 	 *  @return 9-velocity set
 	 */
-	inline const v9& velocity_set()
-	{
-		static v9 v_set;
-		return v_set;
-	}
+	 inline const v9& velocity_set()
+	 {
+	 	static v9 v_set;
+	 	return v_set;
+	 }
 
 } // lb
 
