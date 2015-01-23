@@ -180,11 +180,11 @@ namespace lb
 				dh[7] = (rho*(1 + 3*u*u - 3*v + 3*v*v + u*(-3 + 9*v)))/36. - n.f(7) - ds[7];
 				dh[8] = (rho*(1 + 3*u*u + u*(3 - 9*v) - 3*v + 3*v*v))/36. - n.f(8) - ds[8];
 
-				// float_type f_old[9];
-				// for (unsigned k =0; k<9; ++k) {
-				// 	f_old[k] = l.get_node(i,j).f(k);
-				// }
-				// velocity_set().equilibrate(l.get_node(i,j));
+				float_type f_old[9];
+				for (unsigned k =0; k<9; ++k) {
+					f_old[k] = l.get_node(i,j).f(k);
+				}
+				velocity_set().equilibrate(l.get_node(i,j));
 
 				// for(unsigned dir=0; dir<9; dir++){
 				// 	delta_h_it[dir] = ( f_old[dir] - l.get_node(i,j).f(dir) ) - delta_s[dir];
@@ -206,7 +206,7 @@ namespace lb
 				double gamma_it = 1.0/beta - (2.0-1.0/beta)*(scpr_sh_it/scpr_hh_it);
 
 				for(unsigned k=0; k<9; k++){
-					l.get_node(i,j).f(k) = l.get_node(i,j).f(k) - beta*(2.0*ds[k] + gamma_it*dh[k]);
+					l.get_node(i,j).f(k) = f_old[k] + beta*(2.0*ds[k] + gamma_it*dh[k]);
 				}
 				// /**************************************************************************************************/
 

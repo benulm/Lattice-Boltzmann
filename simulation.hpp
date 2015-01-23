@@ -976,7 +976,7 @@ namespace lb {
 
 
 //#include "standard_collide.hpp"
-//#include "kbc_collide.hpp"
-#include "entropic_collide.hpp"
+#include "kbc_collide.hpp"
+//#include "entropic_collide.hpp"
 
 #endif // LB_SIMULATION_HPP_INCLUDED

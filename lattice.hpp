@@ -415,6 +415,7 @@ lattice::lattice(unsigned int _nx, unsigned int _ny)
 	properties.register_flag_property("fluid");
 	properties.register_flag_property("buffer");
 	properties.register_flag_property("wall");
+	properties.register_flag_property("wall_neigh");
 	
 	// set up nodes and properties
 	unsigned int k(0);
