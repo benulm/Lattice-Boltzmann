@@ -88,6 +88,12 @@ namespace lb {
 				// **************************
 			}
 
+			inline float_type f_eq_one(float_type rho, float_type u, float_type v, int dir) const
+			{
+				   return rho*W[dir]*(2.-sqrt(1.+3.*u*u))*(2.-sqrt(1.+3.*v*v))*power((2.*u+sqrt(1.+3.*u*u))/(1.-u),cx[dir])*power((2.*v+sqrt(1.+3.*v*v))/(1.-v),cy[dir]);
+			}
+
+
 			/** 
 			 *  @brief Equilibrate a node.
 			 * 

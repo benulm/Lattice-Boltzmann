@@ -237,83 +237,177 @@ namespace lb {
 					for(unsigned properties=0; properties<l.wall_nodes[i].obstacle.size() ;properties++){
 						int x_coord = l.wall_nodes[i].coord.i;
 						int y_coord = l.wall_nodes[i].coord.j;
+
+						node * nw_node = &l.get_node( ((x_coord-1 + l.nx) % l.nx ), ((y_coord+1)%l.ny)) ;
+						node * n_node = &l.get_node(x_coord,  ((y_coord+1)%l.ny)) ;
+						node * ne_node = &l.get_node( ((x_coord+1) % l.nx),  ((y_coord+1)%l.ny)) ;
+						node * sw_node = &l.get_node( ((x_coord-1 + l.nx) % l.nx ));
+						node * s_node = &l.get_node( x_coord, ((y_coord-1 + l.ny) % l.ny));
+						node * se_node = &l.get_node( ((x_coord+1) % l.nx),((y_coord-1 + l.ny) % l.ny));
+						node * w_node = &l.get_node( ((x_coord-1 + l.nx) % l.nx ), y_coord);
+						node * e_node = &l.get_node( ((x_coord+1) % l.nx), y_coord);
+
+						std::vector<node*> local_wall_neighs = {nw_node, n_node, ne_node, sw_node, s_node, se_node,w_node,e_node};
+
+						// check if node not yet labelled as wall neigh
+						for (unsigned i =0; i<local_wall_neighs.size(); ++i) {
+							if (local_wall_neighs[i]->has_flag_property("wall_neigh"))
+							{
+								// set wall neighbor property
+								local_wall_neighs[i]->set_flag_property("wall_neigh");
+								l.wall_neigh_nodes.push_back(local_wall_neighs[i]);
+							}
+						}
+
 						switch(l.wall_nodes[i].obstacle[properties]){
 							case wall_orientation::top :
-								l.get_node( ((x_coord-1 + l.nx) % l.nx ), y_coord+1                   ).f(6) = l.wall_nodes[i].f(8);
-								l.get_node(x_coord                      , y_coord+1                   ).f(2) = l.wall_nodes[i].f(4);
-								l.get_node( ((x_coord+1) % l.nx)        , y_coord+1                   ).f(5) = l.wall_nodes[i].f(7);
-								break;
+								{
+									nw_node->f(6) = l.wall_nodes[i].f(8);
+									n_node->f(2) = l.wall_nodes[i].f(4);
+									ne_node->f(5) = l.wall_nodes[i].f(7);
+									break;
+								}
 
 							case wall_orientation::bot :
-								l.get_node(((x_coord-1 + l.nx) % l.nx ), y_coord-1                   ).f(7) = l.wall_nodes[i].f(5);
-								l.get_node(x_coord                     , y_coord-1                   ).f(4) = l.wall_nodes[i].f(2);
-								l.get_node(((x_coord+1) % l.nx)        , y_coord-1                   ).f(8) = l.wall_nodes[i].f(6);	
+								sw_node->f(7) = l.wall_nodes[i].f(5);
+								s_node->f(4) = l.wall_nodes[i].f(2);
+								se_node->f(8) = l.wall_nodes[i].f(6);	
 								break;
 
 							case wall_orientation::left :
-								l.get_node(x_coord-1                   , ((y_coord-1 + l.ny) % l.ny)).f(7) = l.wall_nodes[i].f(5);
-								l.get_node(x_coord-1                   , y_coord                    ).f(3) = l.wall_nodes[i].f(1);
-								l.get_node(x_coord-1                   , ((y_coord+1)%l.ny)         ).f(6) = l.wall_nodes[i].f(8);
+								sw_node->f(7) = l.wall_nodes[i].f(5);
+								w_node->f(3) = l.wall_nodes[i].f(1);
+								nw_node->f(6) = l.wall_nodes[i].f(8);
 								break;
 
 							case wall_orientation::right :
-								l.get_node(x_coord+1                   , ((y_coord-1 + l.ny) % l.ny)).f(8) = l.wall_nodes[i].f(6);
-								l.get_node(x_coord+1                   , y_coord                    ).f(1) = l.wall_nodes[i].f(3);
-								l.get_node(x_coord+1                   , ((y_coord+1)%l.ny)         ).f(5) = l.wall_nodes[i].f(7);	
+								se_node->f(8) = l.wall_nodes[i].f(6);
+								e_node->f(1) = l.wall_nodes[i].f(3);
+								ne_node->f(5) = l.wall_nodes[i].f(7);	
 								break;
 						}
+
+						/*
+						   switch(l.wall_nodes[i].obstacle[properties]){
+						   case wall_orientation::top :
+						   l.get_node( ((x_coord-1 + l.nx) % l.nx ), y_coord+1                   ).f(6) = l.wall_nodes[i].f(8);
+						   l.get_node(x_coord                      , y_coord+1                   ).f(2) = l.wall_nodes[i].f(4);
+						   l.get_node( ((x_coord+1) % l.nx)        , y_coord+1                   ).f(5) = l.wall_nodes[i].f(7);
+						   break;
+
+						   case wall_orientation::bot :
+						   l.get_node(((x_coord-1 + l.nx) % l.nx ), y_coord-1                   ).f(7) = l.wall_nodes[i].f(5);
+						   l.get_node(x_coord                     , y_coord-1                   ).f(4) = l.wall_nodes[i].f(2);
+						   l.get_node(((x_coord+1) % l.nx)        , y_coord-1                   ).f(8) = l.wall_nodes[i].f(6);	
+						   break;
+
+						   case wall_orientation::left :
+						   l.get_node(x_coord-1                   , ((y_coord-1 + l.ny) % l.ny)).f(7) = l.wall_nodes[i].f(5);
+						   l.get_node(x_coord-1                   , y_coord                    ).f(3) = l.wall_nodes[i].f(1);
+						   l.get_node(x_coord-1                   , ((y_coord+1)%l.ny)         ).f(6) = l.wall_nodes[i].f(8);
+						   break;
+
+						   case wall_orientation::right :
+						   l.get_node(x_coord+1                   , ((y_coord-1 + l.ny) % l.ny)).f(8) = l.wall_nodes[i].f(6);
+						   l.get_node(x_coord+1                   , y_coord                    ).f(1) = l.wall_nodes[i].f(3);
+						   l.get_node(x_coord+1                   , ((y_coord+1)%l.ny)         ).f(5) = l.wall_nodes[i].f(7);	
+						   break;
+						   }
+						 */
 					}
 				}
 
 			}
 
 			void tms_bc() {
-				#pragma omp parallel for
+				//1.) perform bounce back BC
+				bounce_back_bc();
+
+				//2.) compute rho_target and u_target in rho and u of boundary_neigh node
+				for (unsigned i=0; i<l.wall_neigh_nodes.size(); ++i) {
+					l.wall_neigh_nodes[i]->rho() = 0;
+					l.wall_neigh_nodes[i]->u() = 0;
+					l.wall_neigh_nodes[i]->v() = 0;				
+
+					for (unsigned k=0; k<9; ++k) {
+						l.wall_neigh_nodes[i]->rho() += l.wall_neigh_nodes[i]->f(i);
+					}
+				}
+
+				//3.) set unknown velocities to f^eq(rho_tgt,u_tgt)
 				for (unsigned int i=0; i<l.wall_nodes.size(); ++i)
 				{
 					for(unsigned properties=0; properties<l.wall_nodes[i].obstacle.size() ;properties++){
 						int x_coord = l.wall_nodes[i].coord.i;
 						int y_coord = l.wall_nodes[i].coord.j;
-						
-						auto nw_node = l.get_node( ((x_coord-1 + l.nx) % l.nx ), ((y_coord+1)%l.ny)) ;
-						auto n_node = l.get_node(x_coord,  ((y_coord+1)%l.ny)) ;
-						auto ne_node = l.get_node( ((x_coord+1) % l.nx),  ((y_coord+1)%l.ny)) ;
-						auto sw_node = l.get_node( ((x_coord-1 + l.nx) % l.nx ));
-						auto s_node = l.get_node( x_coord, ((y_coord-1 + l.ny) % l.ny));
-						auto se_node = l.get_node( ((x_coord+1) % l.nx),((y_coord-1 + l.ny) % l.ny));
-						auto w_node = l.get_node( ((x_coord-1 + l.nx) % l.nx ), y_coord);
-						auto e_node = l.get_node( ((x_coord+1) % l.nx), y_coord);
+
+						node * nw_node = &l.get_node( ((x_coord-1 + l.nx) % l.nx ), ((y_coord+1)%l.ny)) ;
+						node * n_node = &l.get_node(x_coord,  ((y_coord+1)%l.ny)) ;
+						node * ne_node = &l.get_node( ((x_coord+1) % l.nx),  ((y_coord+1)%l.ny)) ;
+						node * sw_node = &l.get_node( ((x_coord-1 + l.nx) % l.nx ));
+						node * s_node = &l.get_node( x_coord, ((y_coord-1 + l.ny) % l.ny));
+						node * se_node = &l.get_node( ((x_coord+1) % l.nx),((y_coord-1 + l.ny) % l.ny));
+						node * w_node = &l.get_node( ((x_coord-1 + l.nx) % l.nx ), y_coord);
+						node * e_node = &l.get_node( ((x_coord+1) % l.nx), y_coord);
 
 						switch(l.wall_nodes[i].obstacle[properties]){
 							case wall_orientation::top :
-							{
-								nw_node.f(6) = l.wall_nodes[i].f(8);
-								n_node.f(2) = l.wall_nodes[i].f(4);
-								ne_node.f(5) = l.wall_nodes[i].f(7);
-								double rho_target_nw = nw_node.f(6);
-								break;
-							}
+								{
+									nw_node->f(6) = velocity_set().f_eq_one(nw_node->rho(), nw_node->u(), nw_node->v(),6);
+									n_node->f(2) = velocity_set().f_eq_one(n_node->rho(), n_node->u(), n_node->v(),2);
+									ne_node->f(5) = velocity_set().f_eq_one(ne_node->rho(), ne_node->u(), ne_node->v(),5);
+									break;
+								}
 
 							case wall_orientation::bot :
-								sw_node.f(7) = l.wall_nodes[i].f(5);
-								s_node.f(4) = l.wall_nodes[i].f(2);
-								se_node.f(8) = l.wall_nodes[i].f(6);	
+								sw_node->f(7) = velocity_set().f_eq_one(sw_node->rho(), sw_node->u(), sw_node->v(),7);
+								s_node->f(4) = velocity_set().f_eq_one(s_node->rho(), s_node->u(), s_node->v(),4);
+								se_node->f(8) = velocity_set().f_eq_one(se_node->rho(), se_node->u(), se_node->v(),8);
 								break;
 
 							case wall_orientation::left :
-								sw_node.f(7) = l.wall_nodes[i].f(5);
-								w_node.f(3) = l.wall_nodes[i].f(1);
-								nw_node.f(6) = l.wall_nodes[i].f(8);
+								sw_node->f(7) = velocity_set().f_eq_one(sw_node->rho(), sw_node->u(), sw_node->v(),7);
+								w_node->f(3) = velocity_set().f_eq_one(w_node->rho(), w_node->u(), w_node->v(),3);
+								nw_node->f(6) = velocity_set().f_eq_one(nw_node->rho(), nw_node->u(), nw_node->v(),6);
 								break;
 
 							case wall_orientation::right :
-								se_node.f(8) = l.wall_nodes[i].f(6);
-								e_node.f(1) = l.wall_nodes[i].f(3);
-								ne_node.f(5) = l.wall_nodes[i].f(7);	
+								se_node->f(8) = velocity_set().f_eq_one(se_node->rho(), se_node->u(), se_node->v(),8);
+								e_node->f(1) = velocity_set().f_eq_one(e_node->rho(), e_node->u(), e_node->v(),1);
+								ne_node->f(5) = velocity_set().f_eq_one(ne_node->rho(), ne_node->u(), ne_node->v(),5);
 								break;
 						}
+
 					}
 				}
+
+				//3.) forall i: f_i = f_i + f_i^eq(rho_tgt, u_tgt)-f_eq(rho_loc,u_loc)
+				for (unsigned i=0; i<l.wall_neigh_nodes.size(); ++i) {
+					//store rho_loc and u_loc 
+					double rho_loc = 0;
+					double u_loc = 0;
+					double v_loc = 0;
+					for (unsigned k=0; k<9; ++k) {
+						rho_loc += l.wall_neigh_nodes[i]->f(k);
+						u_loc += l.wall_neigh_nodes[i]->f(k)*velocity_set().cx[k];
+						v_loc += l.wall_neigh_nodes[i]->f(k)*velocity_set().cy[k];
+					}
+					u_loc /= rho_loc;
+					v_loc /= rho_loc;
+
+					float_type f_eq_tgt[9];
+					float_type f_eq_loc[9];
+
+					// compute f_eq_local and f_eq_target
+					velocity_set().f_eq(f_eq_tgt,l.wall_neigh_nodes[i]->rho(),	l.wall_neigh_nodes[i]->u(), l.wall_neigh_nodes[i]->v());
+					velocity_set().f_eq(f_eq_loc,rho_loc,u_loc,v_loc);
+
+					// Shiam step (2)
+					for (unsigned k=0; k<9; ++k) {
+						l.wall_neigh_nodes[i]->f(k)+= (f_eq_tgt[k]-f_eq_loc[k]);
+					}
+				}
+
 			}
 
 			void collide();
@@ -361,7 +455,8 @@ namespace lb {
 				//std::cout << "STEP starts" << std::endl;	
 				advect();
 
-				bounce_back_bc();
+				//bounce_back_bc();
+				tms_bc();
 				apply_free_slip();
 
 				update_u_rho();
