@@ -50,7 +50,9 @@ namespace lb {
 				// Random number generators for pertubation
 				distrx(-0.01,0.01), // 1
 				distry(-0.02,0.02), // 2
-				g1(712)
+				g1(712),
+				// TMS boundary condition: 1 is use 0 is not use
+				tms_neighbour_set(1)
 		{ 
 			// define amount to shift populations for advection
 			for (unsigned int i=0; i<velocity_set().size; ++i)
@@ -230,7 +232,7 @@ namespace lb {
 			/**  @brief apply wall boundary conditions */
 			void bounce_back_bc()
 			{
-//#pragma omp parallel for
+#pragma omp parallel for if(tms_neighbour_set > 1)
 				for (unsigned int i=0; i<l.wall_nodes.size(); ++i)
 				{
 					for(unsigned properties=0; properties<l.wall_nodes[i].obstacle.size() ;properties++){
@@ -244,49 +246,55 @@ namespace lb {
 								l.get_node( ((x_coord-1 + l.nx) % l.nx ), y_coord+1                   ).f(6) = l.wall_nodes[i].f(8);								
 								l.get_node(x_coord                      , y_coord+1                   ).f(2) = l.wall_nodes[i].f(4);
 								l.get_node( ((x_coord+1) % l.nx)        , y_coord+1                   ).f(5) = l.wall_nodes[i].f(7);
-								local_wall_neighs.push_back(&l.get_node( ((x_coord-1 + l.nx) % l.nx ), y_coord+1));
-								local_wall_neighs.push_back(&l.get_node(x_coord                      , y_coord+1));
-								local_wall_neighs.push_back(&l.get_node( ((x_coord+1) % l.nx)        , y_coord+1));
-
+								if(tms_neighbour_set==1){
+									local_wall_neighs.push_back(&l.get_node( ((x_coord-1 + l.nx) % l.nx ), y_coord+1));
+									local_wall_neighs.push_back(&l.get_node(x_coord                      , y_coord+1));
+									local_wall_neighs.push_back(&l.get_node( ((x_coord+1) % l.nx)        , y_coord+1));
+								}
 								break;
 
 							case wall_orientation::bot :
 								l.get_node(((x_coord-1 + l.nx) % l.nx ), y_coord-1                   ).f(7) = l.wall_nodes[i].f(5);
 								l.get_node(x_coord                     , y_coord-1                   ).f(4) = l.wall_nodes[i].f(2);
 								l.get_node(((x_coord+1) % l.nx)        , y_coord-1                   ).f(8) = l.wall_nodes[i].f(6);	
-								local_wall_neighs.push_back(&l.get_node(((x_coord-1 + l.nx) % l.nx ), y_coord-1                   ));
-								local_wall_neighs.push_back(&l.get_node(x_coord                     , y_coord-1                   ));
-								local_wall_neighs.push_back(&l.get_node(((x_coord+1) % l.nx)        , y_coord-1                   ));
-
+								if(tms_neighbour_set==1){
+									local_wall_neighs.push_back(&l.get_node(((x_coord-1 + l.nx) % l.nx ), y_coord-1                   ));
+									local_wall_neighs.push_back(&l.get_node(x_coord                     , y_coord-1                   ));
+									local_wall_neighs.push_back(&l.get_node(((x_coord+1) % l.nx)        , y_coord-1                   ));
+								}
 								break;
 
 							case wall_orientation::left :
 								l.get_node(x_coord-1                   , ((y_coord-1 + l.ny) % l.ny)).f(7) = l.wall_nodes[i].f(5);
 								l.get_node(x_coord-1                   , y_coord                    ).f(3) = l.wall_nodes[i].f(1);
 								l.get_node(x_coord-1                   , ((y_coord+1)%l.ny)         ).f(6) = l.wall_nodes[i].f(8);
-								local_wall_neighs.push_back(&l.get_node(x_coord-1                   , ((y_coord-1 + l.ny) % l.ny)));
-								local_wall_neighs.push_back(&l.get_node(x_coord-1                   , y_coord                    ));
-								local_wall_neighs.push_back(&l.get_node(x_coord-1                   , ((y_coord+1)%l.ny)         ));
-
+								if(tms_neighbour_set==1){
+									local_wall_neighs.push_back(&l.get_node(x_coord-1                   , ((y_coord-1 + l.ny) % l.ny)));
+									local_wall_neighs.push_back(&l.get_node(x_coord-1                   , y_coord                    ));
+									local_wall_neighs.push_back(&l.get_node(x_coord-1                   , ((y_coord+1)%l.ny)         ));
+								}
 								break;
 
 							case wall_orientation::right :
 								l.get_node(x_coord+1                   , ((y_coord-1 + l.ny) % l.ny)).f(8) = l.wall_nodes[i].f(6);
 								l.get_node(x_coord+1                   , y_coord                    ).f(1) = l.wall_nodes[i].f(3);
 								l.get_node(x_coord+1                   , ((y_coord+1)%l.ny)         ).f(5) = l.wall_nodes[i].f(7);
-								local_wall_neighs.push_back(&l.get_node(x_coord+1                   , ((y_coord-1 + l.ny) % l.ny)));
-								local_wall_neighs.push_back(&l.get_node(x_coord+1                   , y_coord                    ));
-								local_wall_neighs.push_back(&l.get_node(x_coord+1                   , ((y_coord+1)%l.ny)         ));
-
+								if(tms_neighbour_set==1){
+									local_wall_neighs.push_back(&l.get_node(x_coord+1                   , ((y_coord-1 + l.ny) % l.ny)));
+									local_wall_neighs.push_back(&l.get_node(x_coord+1                   , y_coord                    ));
+									local_wall_neighs.push_back(&l.get_node(x_coord+1                   , ((y_coord+1)%l.ny)         ));
+								}
 								break;
 						}
 
-						for (unsigned i =0; i<local_wall_neighs.size(); ++i) {
-						if (!local_wall_neighs[i]->has_flag_property("wall_neigh")) {
-							// set wall neighbor property
-							local_wall_neighs[i]->set_flag_property("wall_neigh");
-							l.wall_neigh_nodes.push_back(local_wall_neighs[i]);
-						}
+						if(tms_neighbour_set==1){
+							for (unsigned i =0; i<local_wall_neighs.size(); ++i) {
+								if (!local_wall_neighs[i]->has_flag_property("wall_neigh")) {
+									// set wall neighbor property
+									local_wall_neighs[i]->set_flag_property("wall_neigh");
+									l.wall_neigh_nodes.push_back(local_wall_neighs[i]);
+								}
+							}
 						}
 
 					//	std::cout << "END BOUNCE BACK" << std::endl;
@@ -350,6 +358,10 @@ namespace lb {
 						 */
 
 					}
+				}
+
+				if(tms_neighbour_set==1){
+					tms_neighbour_set=2;
 				}
 
 			}
@@ -499,9 +511,12 @@ namespace lb {
 			{
 				//std::cout << "STEP starts" << std::endl;	
 				advect();
-
-				//bounce_back_bc();
-				tms_bc();
+				if(tms_neighbour_set == 0){
+					bounce_back_bc();
+				}
+				else{
+					tms_bc();
+				}
 				apply_free_slip();
 
 				update_u_rho();
@@ -652,6 +667,9 @@ namespace lb {
 			std::uniform_real_distribution<double>  distrx;
 			std::uniform_real_distribution<double>  distry;
 			std::mt19937 g1;
+
+			// Flag for using TMS boundary-conditions
+			int tms_neighbour_set;	
 	};
 
 
