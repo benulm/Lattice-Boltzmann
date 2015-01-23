@@ -350,7 +350,8 @@ public: // members
 	std::vector<float_type> u;                ///< flow x-velocity data
 	std::vector<float_type> v;                ///< flow y-velocity data
 	std::vector<node> nodes;                  ///< array holding all node objects
-	std::vector<node> wall_nodes;             ///< array holding node objects belonging to a solid wall 
+	std::vector<node> wall_nodes;             ///< array holding node objects belonging to a solid wall
+	std::vector<node*> wall_neigh_nodes;		  ///< STELLIS: array holding pointer to all nodes, which are affected by a boundary
 	// //---------------------------------------------------------------------------------------------
 	// std::vector<node> u_inf_nodes;
 	// //---------------------------------------------------------------------------------------------
